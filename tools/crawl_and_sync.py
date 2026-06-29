@@ -10,8 +10,12 @@ from tools.sync_context import sync_repo_context
 
 
 def parse_repos_with_context(raw: list[dict]) -> list[str]:
-    """Dedupe + sort repo names from `gh search code` JSON results."""
-    names = {item["repository"]["nameWithOwner"] for item in raw}
+    """Dedupe + sort repo names from `gh search code` JSON results, skipping malformed items."""
+    names = set()
+    for item in raw:
+        name = (item.get("repository") or {}).get("nameWithOwner")
+        if name:
+            names.add(name)
     return sorted(names)
 
 
