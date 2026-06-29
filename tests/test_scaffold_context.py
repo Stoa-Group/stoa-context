@@ -35,3 +35,31 @@ def test_scaffold_appends_rule_once(tmp_path):
     scaffold(repo, TEMPLATES)
     scaffold(repo, TEMPLATES)
     assert (repo / "CLAUDE.md").read_text().count("HARD RULE — Context library") == 1
+
+
+def test_scaffold_guards_domoignore_for_domo_repo(tmp_path):
+    repo = tmp_path / "domorepo"
+    repo.mkdir()
+    (repo / "manifest.json").write_text('{"name":"x"}')  # Domo app indicator
+    scaffold(repo, TEMPLATES)
+    di = (repo / ".domoignore").read_text()
+    assert "context/" in di
+    assert ".github/" in di
+
+
+def test_scaffold_appends_to_existing_domoignore_without_dupes(tmp_path):
+    repo = tmp_path / "domorepo"
+    repo.mkdir()
+    (repo / ".domoignore").write_text("node_modules/\ncontext/\n")  # already has context/
+    scaffold(repo, TEMPLATES)
+    di = (repo / ".domoignore").read_text()
+    assert di.count("context/") == 1          # not duplicated
+    assert ".github/" in di                    # added
+    assert "node_modules/" in di               # preserved
+
+
+def test_scaffold_skips_domoignore_for_non_domo_repo(tmp_path):
+    repo = tmp_path / "plainrepo"
+    repo.mkdir()
+    scaffold(repo, TEMPLATES)
+    assert not (repo / ".domoignore").exists()

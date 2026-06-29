@@ -45,7 +45,33 @@ def scaffold(target_repo: Path, templates_dir: Path) -> list[str]:
         claude.write_text(existing + sep + ("\n" if existing else "") + rule)
         touched.append("CLAUDE.md")
 
+    # 4. Domo-app safety: keep /context and CI out of the `domo publish` build so the
+    #    Kit can never break a Domo dashboard publish. Applied only to Domo repos
+    #    (those with a manifest.json or an existing .domoignore at the root).
+    touched += _guard_domoignore(target_repo)
+
     return touched
+
+
+DOMOIGNORE_ENTRIES = ["context/", ".github/"]
+
+
+def _guard_domoignore(target_repo: Path) -> list[str]:
+    """If target_repo is a Domo app, ensure .domoignore excludes context/ and .github/.
+    No-op for non-Domo repos. Returns [".domoignore"] if it wrote, else []."""
+    target_repo = Path(target_repo)
+    domoignore = target_repo / ".domoignore"
+    is_domo = (target_repo / "manifest.json").is_file() or domoignore.exists()
+    if not is_domo:
+        return []
+    existing = domoignore.read_text() if domoignore.exists() else ""
+    lines = {ln.strip() for ln in existing.splitlines()}
+    missing = [e for e in DOMOIGNORE_ENTRIES if e not in lines]
+    if not missing:
+        return []
+    sep = "" if existing == "" or existing.endswith("\n") else "\n"
+    domoignore.write_text(existing + sep + "\n".join(missing) + "\n")
+    return [".domoignore"]
 
 
 def main(argv=None) -> int:
