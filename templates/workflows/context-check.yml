@@ -30,12 +30,15 @@ jobs:
       - name: Compute changed files vs base
         id: diff
         env:
-          BASE_REF: ${{ github.base_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          git fetch origin "$BASE_REF" --depth=1
+          # base.sha is already present from the fetch-depth:0 checkout; fetch as a
+          # safety net. Two-dot diff (base..HEAD) avoids the "no merge base" failure
+          # that a three-dot diff hits on shallow clones.
+          git fetch --no-tags --depth=1 origin "$BASE_SHA" || true
           {
             echo 'files<<EOF'
-            git diff --name-only "origin/$BASE_REF...HEAD"
+            git diff --name-only "$BASE_SHA" HEAD
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
