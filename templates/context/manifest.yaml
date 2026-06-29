@@ -1,0 +1,13 @@
+# Stoa Context manifest — see STANDARD.md. Agent-generated; keep in sync with the repo.
+project: REPLACE_ME
+repo: Stoa-Group/REPLACE_ME
+description: REPLACE_ME — one-line description of what this repo does.
+owners:
+  - owner@stoagroup.com
+deploy_target: none            # render | domo | github-actions-cron | none
+systems_touched: []            # azure-sql | domo | procore | render-services | onedrive | realpage
+apis_exposed: []
+apis_consumed: []
+schemas: []
+context_version: 1
+last_updated: 2026-06-29

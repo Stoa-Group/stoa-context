@@ -1,0 +1,64 @@
+name: Context Check
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  context-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout stoa-context tooling
+        uses: actions/checkout@v4
+        with:
+          repository: Stoa-Group/stoa-context
+          path: .stoa-context
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install validator deps
+        run: pip install "PyYAML>=6.0" "jsonschema>=4.21"
+
+      - name: Compute changed files vs base
+        id: diff
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch origin "$BASE_REF" --depth=1
+          {
+            echo 'files<<EOF'
+            git diff --name-only "origin/$BASE_REF...HEAD"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run context validator
+        env:
+          CHANGED: ${{ steps.diff.outputs.files }}
+        run: |
+          python .stoa-context/tools/validate_context.py \
+            --repo-root . \
+            --schema .stoa-context/schema/context.schema.json \
+            --changed-files "$CHANGED"
+
+      # Use the gitleaks binary directly (not gitleaks-action@v2, which requires a paid
+      # GITLEAKS_LICENSE for organization private repos). Scan only the context/ tree —
+      # the gate's intent is to block secrets being committed INTO context.
+      - name: Install gitleaks
+        env:
+          GITLEAKS_VERSION: "8.30.1"
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tar.gz
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+          sudo mv /tmp/gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: Secret-scan /context with gitleaks
+        run: gitleaks detect --no-git --source context --config .stoa-context/.gitleaks.toml

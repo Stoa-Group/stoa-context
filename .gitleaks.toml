@@ -1,0 +1,17 @@
+title = "Stoa Context secret-scan config"
+
+# Start from gitleaks' built-in rules, then add Stoa-specific patterns.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "stoa-domo-ddci-token"
+description = "Domo DDCI developer token"
+regex = '''DDCI_[A-Za-z0-9]{20,}'''
+keywords = ["DDCI_"]
+
+[[rules]]
+id = "stoa-sql-conn-string"
+description = "Azure SQL connection string"
+regex = '''Server=tcp:[^;]+;.*Password=[^;]+'''
+keywords = ["Server=tcp:", "Password="]

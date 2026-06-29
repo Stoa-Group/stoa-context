@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stoa-context"
+version = "0.1.0"
+description = "Stoa Context Layer — standard, validator, and scaffolding for per-repo /context."
+requires-python = ">=3.11"
+dependencies = ["PyYAML>=6.0", "jsonschema>=4.21"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.setuptools.packages.find]
+include = ["tools*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
