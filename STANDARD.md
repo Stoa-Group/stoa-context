@@ -37,3 +37,19 @@ update, when `manifest.yaml` is invalid, or when gitleaks detects a secret in `/
 Everything outside `context/admin/` is read-tier (org-wide read MCP). Everything inside
 `context/admin/` is admin-tier (separate authorized MCP install). Admin content is
 references only — a real secret value will be blocked by the gate.
+
+## Aggregator & sync
+
+Per-repo `/context` is aggregated into the PRIVATE `Stoa-Group/stoa-context-store` repo:
+
+- `projects/<owner>__<repo>/context/…` — synced copies (read + admin tiers).
+- `catalog/*.json` — generated registries: `projects`, `apis`, `data-sources`, `services`, `schemas`.
+
+Sync is driven by a local crawler (`tools/crawl_and_sync.py`) that uses existing `gh`/`git`
+credentials — it discovers repos with a `context/manifest.yaml`, shallow-clones each, copies
+`/context` into the store, rebuilds the catalog, and commits/pushes the store. It runs on
+demand and from the autonomous loop. (A future GitHub-App push-trigger can replace the crawl
+for near-real-time sync without per-repo PATs.)
+
+The store is PRIVATE because it contains the admin tier. Plan 3's MCP serves the read tier
+org-wide and the admin tier to authorized installs.
