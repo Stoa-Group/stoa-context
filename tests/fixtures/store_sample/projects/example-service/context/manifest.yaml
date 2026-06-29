@@ -1,0 +1,16 @@
+project: example-service
+repo: Stoa-Group/example-service
+description: Example service.
+owners:
+  - owner@stoagroup.com
+deploy_target: render
+systems_touched:
+  - azure-sql
+  - render-services
+apis_exposed:
+  - { method: GET, path: /api/v1/example, summary: "Example endpoint" }
+apis_consumed: []
+schemas:
+  - example.Widget
+context_version: 3
+last_updated: 2026-06-29

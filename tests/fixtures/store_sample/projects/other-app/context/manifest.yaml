@@ -1,0 +1,16 @@
+project: other-app
+repo: Stoa-Group/other-app
+description: Another app.
+owners:
+  - owner@stoagroup.com
+deploy_target: domo
+systems_touched:
+  - domo
+  - azure-sql
+apis_exposed: []
+apis_consumed:
+  - Stoa-Group/example-service /api/v1/example
+schemas:
+  - example.Widget
+context_version: 1
+last_updated: 2026-06-28
