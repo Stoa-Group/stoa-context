@@ -66,6 +66,12 @@ IGNORED_FILES = {
     ".gitignore",
     ".gitleaks.toml",
     "changelog.md",
+    # Agent-instruction docs, not code -- a CLAUDE.md/AGENTS.md-only change must not
+    # demand a /context bump (hit live 2026-07-06 rolling out the org-wide wiki hard
+    # rule: every context-layer repo's gate went red on a docs-only echo block).
+    "claude.md",
+    "agents.md",
+    "soul.md",
     "makefile",
     "package.json",
     "package-lock.json",
