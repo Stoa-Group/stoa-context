@@ -3,3 +3,62 @@ __pycache__/
 .venv/
 .pytest_cache/
 *.egg-info/
+
+# >>> STOA ORG BASELINE (managed — do not edit inside markers) >>>
+# Added 2026-07-27 by the org QA audit.
+#
+# WHY THIS EXISTS: .domoignore controls what ships in the DOMO BUNDLE.
+# .gitignore controls what enters GIT. They are NOT interchangeable.
+# A 64 MB CSV containing 205,556 rows of resident PII (names, rents, deposits,
+# balances) was committed to leasing-analytics-hub because it was added to
+# .domoignore only. A sensitive file needs BOTH.
+
+# --- secrets / credentials ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.jks
+.domo.env
+secrets/
+credentials.json
+service-account*.json
+
+# --- bulk / tabular data (resident PII, financials, exports) ---
+*.csv
+*.tsv
+*.xlsx
+*.xlsb
+*.xls
+*.parquet
+*.sqlite
+*.sqlite3
+*.db
+*.mdb
+*.bak
+
+# --- build output / deps / caches ---
+node_modules/
+dist/
+build/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+*.tsbuildinfo
+
+# --- logs / temp / editor / OS cruft ---
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+*.swp
+*~
+*copy*
+* copy*
+# <<< STOA ORG BASELINE <<<
