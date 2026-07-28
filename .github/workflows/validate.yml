@@ -1,0 +1,67 @@
+name: Validate
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python syntax + test suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Byte-compile all Python
+        run: python -m compileall -q tools tests
+      - name: Install package with dev extras
+        run: pip install --quiet -e ".[dev]"
+      # This repo owns tools/validate_context.py — the script every OTHER Stoa
+      # repo's `Context Check` gate executes against its PRs. Until this job
+      # existed, the org's enforcement tool was itself unenforced.
+      # NOTE: tests/test_gitleaks_config.py self-skips (2 tests) unless the
+      # gitleaks binary is on PATH. Installing it here would make the shipped
+      # .gitleaks.toml actually validated — deliberately not added in this PR
+      # because it could not be verified green first.
+      - name: Run test suite
+        run: python -m pytest tests/ -q
+
+  json-yaml-parse:
+    name: JSON + YAML parse gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Validate JSON and YAML files parse
+        # Covers schema/*.json (the context manifest schema other repos are
+        # validated against) and templates/ — a malformed schema would silently
+        # break the Context Check gate everywhere.
+        run: |
+          pip install --quiet pyyaml
+          python3 - <<'EOF'
+          import json, pathlib, sys, yaml
+          ok = True
+          for p in pathlib.Path('.').rglob('*.json'):
+              if '.git' in p.parts:
+                  continue
+              try:
+                  json.load(open(p))
+              except Exception as e:
+                  ok = False
+                  print(f"JSON FAIL {p}: {e}")
+          for ext in ('*.yml', '*.yaml'):
+              for p in pathlib.Path('.').rglob(ext):
+                  if '.git' in p.parts:
+                      continue
+                  try:
+                      yaml.safe_load(open(p))
+                  except Exception as e:
+                      ok = False
+                      print(f"YAML FAIL {p}: {e}")
+          print("All JSON/YAML files parse." if ok else "Validation failures above.")
+          sys.exit(0 if ok else 1)
+          EOF
