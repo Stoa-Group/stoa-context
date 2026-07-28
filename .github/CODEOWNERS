@@ -1,0 +1,8 @@
+# CODEOWNERS — stoa-context
+# All PRs require @arovner review.
+
+*            @arovner
+CLAUDE.md    @arovner
+STANDARD.md  @arovner
+schema/      @arovner
+tools/       @arovner
