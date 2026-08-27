@@ -94,7 +94,7 @@ def check_freshness(changed_files: list[str]) -> list[str]:
     """
     context_changed = any(f.startswith("context/") for f in changed_files)
     code_changed = any(
-        f.lower() not in IGNORED_FILES and not f.startswith(IGNORED_PREFIXES)
+        Path(f).name.lower() not in IGNORED_FILES and not f.startswith(IGNORED_PREFIXES)
         for f in changed_files
     )
     if code_changed and not context_changed:
