@@ -79,6 +79,13 @@ def test_freshness_ignores_lockfiles_and_changelog():
     assert check_freshness(["package-lock.json", "CHANGELOG.md", "poetry.lock"]) == []
 
 
+def test_freshness_ignores_lockfiles_in_subdirectories():
+    # Monorepo layouts (e.g. stoagroupDB's /api, MCPServers' /procore, /qualia) keep
+    # package.json/package-lock.json under a subdirectory, not the repo root. A
+    # dependabot-only bump there must not trip the gate.
+    assert check_freshness(["api/package.json", "api/package-lock.json"]) == []
+
+
 def test_run_checks_passes_on_good_context():
     code, messages = run_checks(
         repo_root=FIX / "good_context",
