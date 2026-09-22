@@ -86,6 +86,13 @@ def test_freshness_ignores_lockfiles_in_subdirectories():
     assert check_freshness(["api/package.json", "api/package-lock.json"]) == []
 
 
+def test_freshness_ignores_agent_docs_and_contributing():
+    # Regression coverage for a bug class that has hit live twice with no test:
+    # CLAUDE.md/AGENTS.md (2026-07-06) and CONTRIBUTING.md (2026-09-22), both times
+    # a docs-only PR tripped "code changed but /context was not updated" org-wide.
+    assert check_freshness(["CLAUDE.md", "AGENTS.md", "CONTRIBUTING.md"]) == []
+
+
 def test_run_checks_passes_on_good_context():
     code, messages = run_checks(
         repo_root=FIX / "good_context",
