@@ -72,6 +72,9 @@ IGNORED_FILES = {
     "claude.md",
     "agents.md",
     "soul.md",
+    # Same bug, same fix, never extended to this file -- hit live 2026-09-22 promoting
+    # a CONTRIBUTING.md-only change from dev to main on procore-sync.
+    "contributing.md",
     "makefile",
     "package.json",
     "package-lock.json",
