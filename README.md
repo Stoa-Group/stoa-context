@@ -69,12 +69,12 @@ machine; it does not read any secret from the environment itself.
 
 ## CI/CD
 
-- **`.github/workflows/validate.yml`** — runs on every push and pull request. One job
+- **`.github/workflows/validate.yml`** — runs on every pull request and on push to `main`. One job
   byte-compiles all Python and runs the full `pytest` suite (this is the job that keeps
   the validator every other repo's CI depends on actually working). A second job parses
   every `.json` and `.yml`/`.yaml` file in the repo, to catch a malformed schema or
   template before it can silently break another repo's `Context Check` gate.
-- **`.github/workflows/secret-scan.yml`** — runs on every push and pull request, scanning
+- **`.github/workflows/secret-scan.yml`** — runs on every pull request and on push to `main`, scanning
   the diff with TruffleHog (verified-secrets only) to block committing real credentials.
 
 ## Deployment

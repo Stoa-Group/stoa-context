@@ -1,4 +1,4 @@
-# Triggers on every push and every pull request (any branch).
+# Triggers on every pull request and on pushes to main.
 # Two independent jobs, both required to pass before merging:
 #   - "python": byte-compiles tools/ and tests/, then runs the pytest suite. This is
 #     what keeps tools/validate_context.py itself working, since other Stoa repos'
@@ -6,9 +6,20 @@
 #   - "json-yaml-parse": walks the repo and confirms every .json/.yml/.yaml file
 #     parses, so a malformed schema/context.schema.json or templates/ file can't
 #     silently break the Context Check gate everywhere it's installed.
+# TKT-1258 (Actions minutes, 2026-10-16): runs on PRs + pushes to main only. A push to a
+# feature branch with an open PR used to bill this twice (push + pull_request); pushes
+# to other branches are covered by the PR run that gated them. Superseded PR runs are
+# cancelled.
 name: Validate
 
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
